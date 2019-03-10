@@ -1,15 +1,50 @@
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require('path');
+const fs = require('fs-extra');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-module.exports = {
+class DevelopmentSettings {
+  constructor(options = {}) {
+    this.SRC_DIRECTORY = 'src';
+    this.PAGES_DIRECTORY = 'pages';
+    this.SRC_PATH = path.resolve(__dirname, this.SRC_DIRECTORY);
+    this.PAGES_PATH = path.resolve(this.SRC_PATH, this.PAGES_DIRECTORY);
+    this.pages = [];
+    this.entry = {};
+    this.HtmlWebpackPluginSettings = [];
+    Object.assign(this, options);
+    this.init();
+  }
+
+  init() {
+    this.pages = fs.readdirSync(this.PAGES_PATH);
+    this.entry = this.pages.reduce((acc, page) => {
+      acc[
+        path
+          .basename(page)
+          .split('.')
+          .shift()
+      ] = `./${path.relative(__dirname, path.join(this.PAGES_PATH, page))}/index.js`;
+      return acc;
+    }, {});
+    this.HtmlWebpackPluginSettings = Object.keys(this.entry).map(page => ({
+      filename: `${page}.html`,
+      template: `${path.dirname(this.entry[page])}/tmpl.pug`,
+      chunks: [page],
+      inject: 'body'
+    }));
+  }
+}
+
+const settings = new DevelopmentSettings();
+
+module.exports = () => ({
   // This option controls if and how source maps are generated.
   // https://webpack.js.org/configuration/devtool/
-  devtool: "eval-cheap-module-source-map",
+  devtool: 'eval-cheap-module-source-map',
 
   // https://webpack.js.org/concepts/entry-points/#multi-page-application
   entry: {
-    index: "./src/page-index/main.js",
-    about: "./src/page-about/main.js",
-    contacts: "./src/page-contacts/main.js"
+    ...settings.entry
   },
 
   // https://webpack.js.org/configuration/dev-server/
@@ -23,21 +58,21 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: "babel-loader",
+        loader: 'babel-loader',
         options: {
-          presets: ["@babel/preset-env"]
+          presets: ['@babel/preset-env']
         }
       },
       {
         test: /\.pug$/,
-        use: ["html-loader?attrs=false", "pug-html-loader"]
+        use: ['html-loader?attrs=false', 'pug-html-loader']
       },
       {
         test: /\.s?css$/,
         use: [
-          "style-loader",
-          "css-loader",
-          "sass-loader"
+          'style-loader',
+          'css-loader',
+          'sass-loader'
           // Please note we are not running postcss here
         ]
       },
@@ -46,10 +81,10 @@ module.exports = {
         test: /\.(png|jpg|gif|svg)$/,
         use: [
           {
-            loader: "url-loader",
+            loader: 'url-loader',
             options: {
               // On development we want to see where the file is coming from, hence we preserve the [path]
-              name: "[path][name].[ext]?hash=[hash:20]",
+              name: '[path][name].[ext]?hash=[hash:20]',
               limit: 8192
             }
           }
@@ -57,26 +92,8 @@ module.exports = {
       }
     ]
   },
-
   // https://webpack.js.org/concepts/plugins/
   plugins: [
-    new HtmlWebpackPlugin({
-      template: "./src/page-index/tmpl.pug",
-      inject: true,
-      chunks: ["index"],
-      filename: "index.html"
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/page-about/tmpl.pug",
-      inject: true,
-      chunks: ["about"],
-      filename: "about.html"
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/page-contacts/tmpl.pug",
-      inject: true,
-      chunks: ["contacts"],
-      filename: "contacts.html"
-    })
+    ...settings.HtmlWebpackPluginSettings.map(pageSettings => new HtmlWebpackPlugin(pageSettings))
   ]
-};
+});
