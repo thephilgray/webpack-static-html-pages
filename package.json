@@ -14,9 +14,7 @@
     "normalize.css": "^8.0.1"
   },
   "scripts": {
-    "start": "webpack-dev-server --config webpack.dev.js --mode development",
-    "build": "webpack --config webpack.prod.js --mode production",
-    "preview": "npm run build && http-server dist"
+    "start": "webpack-dev-server --config webpack.dev.js --mode development"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
