@@ -28,7 +28,9 @@ class DevelopmentSettings {
     }, {});
     this.HtmlWebpackPluginSettings = Object.keys(this.entry).map(page => ({
       filename: `${page}.html`,
-      template: `${path.dirname(this.entry[page])}/tmpl.pug`,
+      template: fs.pathExistsSync(`${path.dirname(this.entry[page])}/tmpl.pug`)
+        ? `${path.dirname(this.entry[page])}/tmpl.pug`
+        : path.resolve(process.cwd(), 'src/templates/layout.pug'),
       chunks: [page],
       inject: 'body'
     }));
