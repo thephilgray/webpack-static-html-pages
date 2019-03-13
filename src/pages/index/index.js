@@ -1,14 +1,14 @@
-require("normalize.css/normalize.css");
-require("../../css/main.css");
-require("./page.css");
+require('normalize.css/normalize.css');
+require('../../css/main.css');
+require('./styles.css');
 
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOMContentLoaded", "page-index");
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded', 'page-index');
 });
 
 class Foo {
   constructor() {
-    this.value = "foobar";
+    this.value = 'foobar';
   }
   static instance() {
     return new Foo();
