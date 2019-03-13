@@ -34,7 +34,8 @@ class DevelopmentSettings {
       chunks: [page],
       inject: 'body',
       data: {
-        pages: this.pages
+        pages: this.pages,
+        page
       }
     }));
   }
