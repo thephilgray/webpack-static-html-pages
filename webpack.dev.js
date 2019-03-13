@@ -32,7 +32,10 @@ class DevelopmentSettings {
         ? `${path.dirname(this.entry[page])}/template.pug`
         : path.resolve(process.cwd(), 'src/templates/layout.pug'),
       chunks: [page],
-      inject: 'body'
+      inject: 'body',
+      data: {
+        pages: this.pages
+      }
     }));
   }
 }
@@ -67,7 +70,7 @@ module.exports = () => ({
       },
       {
         test: /\.pug$/,
-        use: ['html-loader?attrs=false', 'pug-html-loader']
+        use: ['pug-loader']
       },
       {
         test: /\.s?css$/,
